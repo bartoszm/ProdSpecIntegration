@@ -1,0 +1,148 @@
+{
+ "title": "MEF LSO Sonata payload schema for [product: Access E-Line], [entity: OVC]", 
+ "description": "[operation: Inventory], [updated: 2020-Apr-5]", 
+ "$schema": "http://json-schema.org/draft-07/schema#", 
+ "$id": "Sonata-AEL-Inventory",
+ "type": "object", 
+ "properties": {
+     "ovc": {
+        "type": "object", 
+        "description": "OVC Service Attributes control the behavior observable at and between External Interfaces to the Carrier Ethernet Network (CEN). The behaviors are achieved by the Network Operator and the Operator's client (the Service Provider in this case) agreeing on the value for each of the Service Attributes.", 
+        "properties": { 
+            "maximumFrameSize": {
+                "description": "OVC Maximum Frame Size - MEF 26.2 §12.6",
+                "type": "number", "minimum": 1526 },
+            "ceVlanIdPreservation": {
+                "description": "OVC CE-VLAN ID Preservation - MEF 26.2 §12.7",
+                "enum": ["Preserve", "Strip", "Retain"] },
+            "cTagPcpPreservation": {
+                "description": "OVC CE-VLAN PCP Preservation - MEF 26.2 §12.8",
+                "enum": ["Enabled", "Disabled"] },
+            "cTagDeiPreservation": {
+                "description": "OVC CE-VLAN DEI Preservation - MEF 26.2 §12.9",
+                "enum": ["Enabled", "Disabled"] },
+            "listOfClassOfServiceNames": {
+                "description": "OVC List of Class of Service Names - MEF 26.2 §12.12",
+                "type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, 
+                "items": { 
+                    "type": "string" }
+                },
+            "carrierEthernetSls": {
+                "description": "OVC Service Level Specification - MEF 26.2 §12.13",
+                "type": "string" },
+            "availableMegLevel": {
+                "description": "OVC Available MEG Level - MEF 26.2 §12.15",
+                "enum": ["None", 0, 1, 2, 3, 4, 5, 6, 7] },
+            "l2cpAddressSet": {
+                "description": "OVC L2CP Address Set - MEF 45 §8.1 and MEF 26.2 §12.16",
+                "enum": ["CTA", "CTB", "CTB-2"] }
+            },
+    "required": ["maximumFrameSize", "ceVlanIdPreservation", "cTagPcpPreservation", "cTagDeiPreservation", "listOfClassOfServiceNames", "carrierEthernetSls", "availableMegLevel"]
+        },
+    "operatorUniEP": {
+        "type": "object", 
+        "description": "An OVC End Point is a logical entity at a given External Interface that is associated with a distinct set of frames passing over that External Interface.", 
+        "properties": { 
+            "externalInterfaceIdentifier": {
+                "description": "OVC End Point External Interface Type - MEF 26.2 §16.2",
+                "enum": ["UNI", "ENNI"] },
+            "ovcEndPointMap": {
+                "description": "OVC End Point Map - MEF 26.2 §16.5",
+                "type": "array", "minItems": 1, "maxItems": 4094, "uniqueItems": true, 
+                "items": { 
+                    "type": "number", "minimum": 1, "maximum": 4094 }
+                },
+            "ingressClassOfServiceMap": {
+                "description": "OVC End Point Class of Service Identifier - MEF 26.2 §16.6",
+                "type": "string" },
+            "colorMap": {
+                "description": "OVC End Point Color Identifier - MEF 26.2 §16.7",
+                "type": "string" },
+            "egressMap": {
+                "description": "OVC End Point Egress Map - MEF 26.2 §16.8",
+                "type": "string" },
+            "sourceAddressMacLimit": {
+                "description": "OVC End Point Source MAC Address Limit - MEF 26.2 §16.15",
+                "type": "object",  "$ref": "#/definitions/obj_saLimit" }
+            },
+    "required": ["externalInterfaceIdentifier", "ovcEndPointMap", "ingressClassOfServiceMap", "colorMap", "sourceAddressMacLimit"]
+        }
+    },
+    "definitions": {
+        "obj_envelope": {
+            "type": "object",
+                "properties": {
+                    "envelopeName": {"type": "string"},
+            "envelopeCF0": {"type": "number", "minimum": 0, "maximum": 1}
+                },
+                "required": ["envelopeName", "envelopCF0"]
+        },
+        "obj_envelope": {
+            "type": "object",
+                "properties": {
+                    "envelopeName": {"type": "string"},
+            "envelopeCF0": {"type": "number", "minimum": 0, "maximum": 1}
+                },
+                "required": ["envelopeName", "envelopCF0"]
+        },
+        "obj_megList": {
+            "type": "object",
+                "properties": {
+                    "megN": {"type": "number", "minimum": 0, "maximum": 7},
+            "megDir": {"enum": ["Up", "Down"]}
+                }
+        },
+        "obj_bwp": {
+            "type": "object",
+                "properties": {
+                    "cir": {"type": "number", "minimum": 0},
+            "cirmax": {"type": "number", "minimum": 0},
+            "cbs": {"type": "number", "minimum": 40000},
+            "eir": {"type": "number", "minimum": 0},
+            "eirmax": {"type": "number", "minimum": 0},
+            "ebs": {"type": "number", "minimum": 4000},
+            "cf": {"type": "number", "minimum": 0, "maximum": 1},
+            "cm": {"enum": ["color-blind", "color-aware"]},
+            "er": {"type": "object", "$ref": "/definition/obj_envelrank"},
+            "f": {"type": "integer"}
+                }
+        },
+        "obj_envelrank": {
+            "type": "object",
+                "properties": {
+                    "envelopeName": {"type": "string"},
+            "envelopeRank": {"type": "number", "minimum": 1}
+                },
+                "required": ["envelopeName", "envelopeRank"]
+        },
+        "obj_dbwp": {
+            "type": "object",
+                "properties": {
+                    "dbwp": {"oneof": [
+                        {"const": "Disabled"},
+                        {"$ref": "#/definitions/obj_bwp"}
+                        ]
+            }
+                }
+        },
+        "obj_cosbwp": {
+            "type": "object",
+                "properties": {
+                    "cosName": {"type": "string"},
+            "cosBwp": { "oneof": [
+                        {"const": "Disabled"},
+                        {"$ref": "#/definitions/obj_bwp"}
+                        ]
+            }
+                }
+        },
+        "obj_saLimit": {
+            "type": "object",
+                "properties": {
+                    "saNumAddr": {"type": "integer"},
+            "saInterval": {"type": "integer"}
+                },
+                "required": ["saNumAddr", "saInterval"]
+        }
+    }
+}
