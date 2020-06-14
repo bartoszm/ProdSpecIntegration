@@ -708,10 +708,6 @@ definitions:
       "@type":
         description: "Technical attribute to extend the class."
         type: "string"
-      productCharacteristic:
-        type: "array"
-        items:
-          $ref: "#/definitions/Characteristic"
   ProductRelationship:
     description: "Indicates a relationship between products."
     required:
@@ -765,10 +761,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/RelatedPlaceRefOrValue"
-      productCharacteristic:
-        type: "array"
-        items:
-          $ref: "#/definitions/Characteristic"
       "@type":
         description:
           "When\_sub-classing,\_this\_defines\_the\_sub-class\_entity\_\
@@ -1387,43 +1379,3 @@ definitions:
           "@referredType":
             description: "Type of the referenced place (like GeographicAddress or GeographicSite)"
             type: "string"
-  Characteristic:
-    description:
-      "Describes a given characteristic of an object or entity through\
-      \ a name/value pair."
-    discriminator: "@type"
-    required:
-      - "name"
-      - "@type"
-    type: "object"
-    properties:
-      id:
-        description: "Unique identifier of the characteristic"
-        type: "string"
-      name:
-        description: "Name of the characteristic"
-        type: "string"
-      valueType:
-        description: "Data type of the value of the characteristic"
-        type: "string"
-      "@baseType":
-        description: "When sub-classing, this defines the super-class"
-        type: "string"
-      "@type":
-        description: "When sub-classing, this defines the sub-class Extensible name"
-        type: "string"
-      "@schemaLocation":
-        description:
-          "A URI to a JSON-Schema file that defines additional attributes\
-          \ and relationships"
-        type: "string"
-  MapCharacteristic:
-    description: "Characteristic specialization for object to be mapped."
-    allOf:
-      - $ref: "#/definitions/Characteristic"
-      - required:
-          - "value"
-        type: "object"
-        properties:
-          value:
-            type: "object"

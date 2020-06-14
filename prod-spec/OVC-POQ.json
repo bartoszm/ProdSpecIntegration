@@ -1,0 +1,616 @@
+{
+ "title": "MEF LSO Sonata Schema for Access E-Line [OVC] - Function: POQ", 
+ "description": "MEF Forum [updated: 2020-Jun-3]", 
+ "$schema": "http://json-schema.org/draft-07/schema#", 
+ "$id": "Sonata-AEL-POQ",
+ "type": "object", 
+ "properties": {
+    "mefAttributes": {
+      "type": "object",
+      "$ref": "#/definitions/OVC"
+    }
+  },
+"required": ["mefAttributes"],
+"definitions": {
+    "OVC" : {
+      "type": "object",
+        "description": "OVC Service Attributes control the behavior observable at and between External Interfaces to the Carrier Ethernet Network (CEN). The behaviors are achieved by the Network Operator and the Operator's client (the Service Provider in this case) agreeing on the value for each of the Service Attributes.",
+        "properties": {
+            "role": {
+                "description": "Schema role - MEF 57.2 §9.12.1 (under devel)",
+                "enum" : ["ovc"]  },
+            "maximumFrameSize": {
+                "description": "OVC Maximum Frame Size - MEF 26.2 §12.6",
+                "type": "integer", "minimum": 1526 },
+            "ceVlanIdPreservation": {
+                "description": "OVC CE-VLAN ID Preservation - MEF 26.2 §12.7",
+                "enum": ["PRESERVE", "STRIP", "RETAIN"] },
+            "cTagPcpPreservation": {
+                "description": "OVC CE-VLAN PCP Preservation - MEF 26.2 §12.8",
+                "enum": ["ENABLED", "DISABLED"] },
+            "cTagDeiPreservation": {
+                "description": "OVC CE-VLAN DEI Preservation - MEF 26.2 §12.9",
+                "enum": ["ENABLED", "DISABLED"] },
+            "listOfClassOfServiceNames": {
+                "description": "OVC List of Class of Service Names - MEF 26.2 §12.12",
+                "type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, 
+                "items": { 
+                    "type": "string" }
+                },
+            "carrierEthernetSls": {
+                "description": "OVC Service Level Specification - MEF 26.2 §12.13",
+                "type": "string" },
+            "availableMegLevel": {
+                "description": "OVC Available MEG Level - MEF 26.2 §12.15",
+                "type": "number", "minimum": 0, "maximum": 6 },
+            "l2cpAddressSet": {
+                "description": "OVC L2CP Address Set - MEF 45 §8.1 and MEF 26.2 §12.16",
+                "enum": ["CTA", "CTB", "CTB2"] },
+            "uniEP": {
+                "description": "UNI OVC End Point - MEF 26.2",
+                "type": "object",  "$ref": "#/definitions/objOvcEP" },
+            "enniEP": {
+                "description": "ENNI OVC End Point - MEF 26.2",
+                "type": "object",  "$ref": "#/definitions/objOvcEP" }
+        },
+        "required": ["role", "uniEP", "enniEP"]
+    },
+    "objOvcEP": {
+        "type": "object",
+        "description": "An OVC End Point is a logical entity at a given External Interface that is associated with a distinct set of frames passing over that External Interface.",
+        "properties": {
+            "externalInterfaceType": {
+                "description": "OVC End Point External Interface Type - MEF 26.2 §16.2",
+                "enum": ["UNI", "ENNI"] },
+            "ovcEndPointMap": {
+                "description": "OVC End Point Map - MEF 26.2 §16.5",
+                "type": "object",  "$ref": "#/definitions/objVlanMap" },
+            "ingressClassOfServiceMap": {
+                "description": "OVC End Point Class of Service Identifier - MEF 26.2 §16.6",
+                "type": "string" },
+            "colorMap": {
+                "description": "OVC End Point Color Identifier - MEF 26.2 §16.7",
+                "type": "string" },
+            "egressMap": {
+                "description": "OVC End Point Egress Map - MEF 26.2 §16.8",
+                "type": "string" },
+            "ingressBandwidthProfilePerEndPoint": {
+                "description": "Ingress Bandwidth Profile per OVC End Point - MEF 26.2 §16.10",
+                "$ref": "#/definitions/objBWP"
+			} ,
+            "ingressBandwidthProfilePerClassOfServiceName": {
+                "description": "Ingress Bandwidth Profile per Class of Service Name Service Attribute - MEF 26.2 §16.12",
+                "type": "array", "minItems": 1, "maxItems": 8, 
+                "items": { 
+                    "type": "object",  "$ref": "#/definitions/objCosBWP" }
+                },
+            "aggregationLinkDepth": {
+                "description": "OVC End Point Aggregation Link Depth - MEF 26.2 §16.14",
+                "type": "object",  "$ref": "#/definitions/objLinkDepth" },
+            "sourceAddressMacLimit": {
+                "description": "OVC End Point Source MAC Address Limit - MEF 26.2 §16.15",
+                "type": "string" },
+            "megIntermediatePoint": {
+                "description": "OVC End Point MIP - MEF 26.2 §16.16",
+                "enum": ["ENABLED", "DISABLED"] },
+            "maintenanceEndPointList": {
+                "description": "OVC End Point Maintenance End Point List - MEF 26.2 §16.17",
+                "type": "array", "minItems": 0, "maxItems": 7, 
+                "items": { 
+                    "type": "object",  "$ref": "#/definitions/objMEPspec" }
+                }
+        }
+    },
+    "objMEPspec": {
+        "type": "object",
+        "description": "A 2-tuple for a MEP at an interface containing MEG level and direction",
+        "properties": {
+
+        }
+    },
+    "objBWP": {
+        "type": "object",
+        "description": "The MEF Bandwidth Profile 11-tuple as described in MEF 10.4 section 12.1.2. (MEF 10.4 actually defines a 10-tuple where Envelope Name and Rank are a single attribute).",
+        "properties": {
+
+        }
+    },
+    "objSaLimit": {
+        "type": "object",
+        "description": "2-tuple to encode the Source Address limit and time interval",
+        "properties": {
+
+        }
+    },
+    "objLinkDepth": {
+        "type": "object",
+        "description": "A 2-tuple {SVID, Depth} that indicates at the ENNI how many LAG links can be used by the SVID (one at a time).",
+        "properties": {
+
+        }
+    },
+    "objCosBWP": {
+        "type": "object",
+        "description": "2-tuple of CoS Name and Bandwidth Profile.",
+        "properties": {
+
+        }
+    },
+    "objVlanRange": {
+        "type": "object",
+        "description": "A range of VLANs allowing three forms: x, x → x, and x → y",
+        "properties": {
+
+        }
+    },
+    "objVlanMap": {
+        "type": "object",
+        "description": "ALL (for port-based service) or a list of VLAN ranges",
+        "properties": {
+
+        }
+    },
+    "objVlanRangeList": {
+        "type": "object",
+        "description": "A list of VLAN Ranges",
+        "properties": {
+
+        }
+    },
+  "CarrierEthernetSls" : {
+      "type" : "object",
+      "description" : "Data type that represents Carrier Ethernet Service Level Specification that provides a list of Performance Metrics where each item in the list includes the parameters and performance objective for the given Performance Metric. It is associated with EVC or OVC and a list of SlsCosNameEntry(s). Reference MEF 10.4 Section 8.8 EVC Service Specification Service Attribute and MEF 26.2 Section 12.13 OVC Service Level Specification Service Attribute.",
+      "properties" : {
+        "timeInterval" : {
+          "$ref" : "#/definitions/TimeIntervalT"
+        },
+        "startTime" : {
+          "$ref" : "#/definitions/TimeAndDate"
+        },
+        "slsCosNameEntry" : {
+          "description" : "Pointer to SlsCosNameEntry.",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SlsCosNameEntry"
+          },
+          "minItems" : 1
+        }
+      }
+    },
+    "SlsCosNameEntry" : {
+      "type" : "object",
+      "description" : "The SlsCosNameEntry data type represents the CoS Name entry consisting of a list of 5-tuples of the form <CoS Name, deltat, C, n, PM> where CoS Name as Class of Service Name, deltat as a small time interval, C as a threshold and n to identify consecutive deltat for high loss interval and PM is a non-empty list where each element in the list consists of Performance Metrics. The SlsCosNameEntry data type is associated with EVC or OVC and SlsObjectiveAndParameters. Reference MEF 10.4 Section 8.8 EVC Service Level Specification Service Attribute and MEF 26.2 Section 12.13 OVC Service Level Specification Service Attribute.",
+      "properties" : {
+        "cosName" : {
+          "description" : "Class of Service name.",
+          "type" : "string"
+        },
+        "deltaT" : {
+          "description" : "This attribute denotes the delta-T, a time interval in seconds, smaller than T (SLS time period).",
+          "type" : "integer"
+        },
+        "thresholdC" : {
+          "description" : "Denotes the threshold for PM, used to determine whether a given time interval delta t has high loss.",
+          "type" : "number"
+        },
+        "consecutiveIntervalN" : {
+          "description" : "This attribute denotes n, used to identify how many consecutive delta-T intervals must have high loss to trigger a change in Availability.",
+          "type" : "integer"
+        },
+        "slsObjectiveAndParameterList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SlsObjectiveAndParameters"
+          },
+          "minItems" : 0
+        }
+      }
+    },
+    "SlsObjectiveAndParameters" : {
+      "type" : "object",
+      "description" : "The Service Level Specification (SLS) is the technical details of the service level, in terms of Performance Objectives, agreed between the Service Provider and the Subscriber (or Operator) as part of the Service Level Agreement.  A given SLS might contain 0, 1, or more Performance Objectives for each Performance Metric. The SlsObjectiveAndParameters data type associating the set of performance parameters such as FD, MFD, FDR, IFDV, FLR, Availability, HILI, CHLI, Composite and Group Availablity for Ordered Pairs. Reference MEF 10.4 Section 8.8 EVC Service Level Specification Service Attribute and MEF 26.2 Section 12.13 OVC Service Level Specification Service Attribute.",
+      "properties" : {
+        "oneWayFrameDelayPmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Frame Delay Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayFrameDelayPmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayInterFrameDelayVariationPmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Inter-Frame Delay Variation Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayInterFrameDelayVariationPmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayMeanFrameDelayPmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Mean Frame Delay Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayMeanFrameDelayPmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayFrameLossRatioPmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Frame Loss Ratio Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayFrameLossRatioPmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayMeanFrameDelayRangePmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Frame Delay Range Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayMeanFrameDelayRangePmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayAvailabilityPmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Availability Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayAvailabilityPmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayHighLossIntervalPmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way High Loss Interval Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayHighLossIntervalPmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayConsecutiveHighLossIntervalPmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Consecutive High Loss Interval Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayConsecutiveHighLossIntervalPmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayCompositePmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Composite Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayCompositePmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayGroupAvailabilityPmMetric" : {
+          "type" : "array",
+          "description" : "Pointer to One-way Group Availability Performance Management Metric.",
+          "items" : {
+            "$ref" : "#/definitions/OneWayGroupAvailabilityPmMetric"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        }
+      }
+    },
+    "OneWayFrameDelayPmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Frame Delay Performance Metric. Reference MEF 10.4 Section 8.8.2 One-way Frame Delay Performance Metric and MEF 26.2 Section 12.13.2 One-way Frame Delay Performance Metric.",
+      "properties" : {
+        "orderedPairList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayFdPercentile" : {
+          "$ref" : "#/definitions/Percentage"
+        },
+        "oneWayFdObjective" : {
+          "$ref" : "#/definitions/Time"
+        }
+      }
+    },
+    "OneWayMeanFrameDelayPmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Mean Frame Delay Performance Metric. Reference MEF 10.4 Section 8.8.3 One-way Mean Frame Delay Performance Metric and MEF 26.2 Section 12.13.3 One-way Mean Frame Delay Performance Metric.",
+      "properties" : {
+        "orderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayMfdObjective" : {
+          "$ref" : "#/definitions/Time"
+        }
+      }
+    },
+    "OneWayMeanFrameDelayRangePmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Frame Delay Range Performance Metric. Reference MEF 10.4 Section 8.8.4 One-way Frame Delay Range Performance Metric and MEF 26.2 Section 12.13.4 One-way Frame Delay Range Performance Metric.",
+      "properties" : {
+        "orderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayFdrPercentile" : {
+          "$ref" : "#/definitions/Percentage"
+        },
+        "oneWayFdrObjective" : {
+          "$ref" : "#/definitions/Time"
+        }
+      }
+    },
+    "OneWayInterFrameDelayVariationPmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Inter-Frame Delay Performance Metric. Reference MEF 10.4 Section 8.8.5 One-way InterFrame Delay Performance Metric and MEF 26.2 Section 12.13.5 One-way Inter-Frame Delay Performance Metric.",
+      "properties" : {
+        "orderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "timeDuration" : {
+          "$ref" : "#/definitions/Time"
+        },
+        "oneWayIfdvPercentile" : {
+          "$ref" : "#/definitions/Percentage"
+        },
+        "oneWayIfdvObjective" : {
+          "$ref" : "#/definitions/Time"
+        }
+      }
+    },
+    "OneWayFrameLossRatioPmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Frame Loss Ratio Performance Metric. Reference MEF 10.4 Section 8.8.6 One-way Frame Loss Ratio Performance Metric and MEF 26.2 Section 12.13.6 One-way Frame Loss Performance Metric.",
+      "properties" : {
+        "orderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayFrameLossRatioObjective" : {
+          "$ref" : "#/definitions/Percentage"
+        }
+      }
+    },
+    "OneWayAvailabilityPmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Availability Performance Metric. Reference MEF 10.4 Section 8.8.7 One-way Availability Performance Metric and MEF 26.2 Section 12.13.7 One-way Availability Performance Metric.",
+      "properties" : {
+        "orderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayAvailabilityObjective" : {
+          "$ref" : "#/definitions/Percentage"
+        }
+      }
+    },
+    "OneWayHighLossIntervalPmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Consecutive High Loss Intervals Performance Metric. Reference MEF 10.4 Section 8.8.9 One-way Consecutive High Loss Intervals Performance Metric and MEF 26.2 Section 12.13.9 One-way Consecutive High Loss Intervals Performance Metric.",
+      "properties" : {
+        "orderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "oneWayHighLossIntervalsObjective" : {
+          "type" : "integer"
+        }
+      }
+    },
+    "OneWayConsecutiveHighLossIntervalPmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Consecutive High Loss Intervals Performance Metric. Reference MEF 10.4 Section 8.8.9 One-way Consecutive High Loss Intervals Performance Metric and MEF 26.2 Section 12.13.9 One-way Consecutive High Loss Intervals Performance Metric.",
+      "properties" : {
+        "orderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "consecutiveNumberP" : {
+          "type" : "integer"
+        },
+        "oneWayChliObjective" : {
+          "type" : "integer"
+        }
+      }
+    },
+    "OneWayCompositePmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Composite Performance Metric. Reference MEF 10.4 Section 8.8.10 One-way Composite Performance Metric.",
+      "properties" : {
+        "orderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 0,
+          "maxItems" : 1
+        },
+        "compositePerformanceIndicatorThreshold" : {
+          "type" : "number",
+          "description" : "Composite Performance Indicator threshold which if exceeded suggests an unacceptable time interval."
+        },
+        "compositeFrameLoss" : {
+          "type" : "integer",
+          "description" : "Composite indicator for One-way Frame Loss equal to 0 or 1.",
+          "minimum" : 0,
+          "maximum" : 1
+        },
+        "compositeFrameDelay" : {
+          "type" : "integer",
+          "description" : "Composite indicator for One-way Frame Delay equal to 0 or 1.",
+          "minimum" : 0,
+          "maximum" : 1
+        },
+        "compositeFrameDelayVariation" : {
+          "type" : "integer",
+          "description" : "Composite indicator for One-way Frame Delay Variation equal to 0 or 1."
+        },
+        "oneWayFdThreshold" : {
+          "$ref" : "#/definitions/Time"
+        },
+        "oneWayIfdvThreshold" : {
+          "$ref" : "#/definitions/Time"
+        },
+        "cpmObjective" : {
+          "$ref" : "#/definitions/Percentage"
+        }
+      }
+    },
+    "OneWayGroupAvailabilityPmMetric" : {
+      "type" : "object",
+      "description" : "Data type representing One-way Group Availability Performance Metric. Reference MEF 10.4 Section 8.8.11 One-way Group Availability Performance Metric and MEF 26.2 Section 12.13.10 One-way Group Availability Performance Metric.",
+      "properties" : {
+        "setOfOrderedPairs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SetOfOrderedPairs"
+          },
+          "minItems" : 1
+        },
+        "minimumNumberOfSetsAvailableK" : {
+          "type" : "integer",
+          "minimum" : 1
+        },
+        "oneWayGroupAvailabilityObjective" : {
+          "$ref" : "#/definitions/Percentage"
+        }
+      }
+    },
+    "OrderedPair" : {
+      "type" : "object",
+      "description" : "The OrderedPair data type is an ordered pair of EVC/OVC End Points for a specific performance metric for one way direction. It is associated with one way performance metrics and a pair of  CarrierEthernetServiceEndPoints.",
+      "properties" : {
+        "uuid" : {
+          "type" : "string",
+          "description" : "Unique identifier for Ordered Pair."
+        },
+        "toUni" : {
+          "type" : "string",
+          "description" : "NOTE: Need to point to schema reference."
+        },
+        "fromUni" : {
+          "type" : "string",
+          "description" : "NOTE: Need to point to schema reference."
+        }
+      }
+    },
+    "Percentage" : {
+      "type" : "number",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "SetOfOrderedPairs" : {
+      "type" : "object",
+      "description" : "Data type representing a set of Ordered Pairs.",
+      "properties" : {
+        "orderedPairsList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderedPair"
+          },
+          "minItems" : 1
+        }
+      }
+    },
+    "Time" : {
+      "type" : "object",
+      "description" : "A data type used to represent time in various units.",
+      "properties" : {
+        "number" : {
+          "type" : "number",
+          "description" : "Time as a float."
+        },
+        "unit" : {
+          "type" : "string",
+          "description" : "Time units as set of enumerations.",
+          "enum" : [ "nanoSeconds", "microSeconds", "milliSeconds", "seconds", "minutes", "hours", "days", "weeks", "months", "years" ]
+        }
+      }
+    },
+    "TimeAndDate" : {
+      "type" : "object",
+      "description" : "This data type is for Time and Date in UTC. Used for CarrierEthernetSls startTime attribute.",
+      "properties" : {
+        "day" : {
+          "type" : "integer",
+          "description" : "Denotes the day."
+        },
+        "hour" : {
+          "type" : "integer",
+          "description" : "Denotes the hour."
+        },
+        "minute" : {
+          "type" : "integer",
+          "description" : "Denotes the minute."
+        },
+        "month" : {
+          "type" : "integer",
+          "description" : "Denotes the month."
+        },
+        "second" : {
+          "type" : "integer",
+          "description" : "Denotes the second."
+        },
+        "year" : {
+          "type" : "integer",
+          "description" : "Denotes the year."
+        }
+      }
+    },
+    "TimeIntervalT" : {
+      "type" : "object",
+      "description" : "This attribute sets the time interval to evaluate the performance for the SLS.  All performances of this SLS use the same time interval T, which itself may not be constrained, e.g., 1 month.",
+      "properties" : {
+        "number" : {
+          "type" : "integer",
+          "description" : "This denotes the value (for the unit)."
+        },
+        "unit" : {
+          "type" : "string",
+          "description" : "Time interval unit.",
+          "enum" : [ "second", "minute", "hour", "day", "month", "week", "year" ]
+        }
+      }
+    }
+  }
+}
