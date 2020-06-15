@@ -1,0 +1,2146 @@
+openapi: 3.0.1
+info:
+  description: |
+    **ProductOfferingQualification Management**
+
+    The Product Offering Qualification (POQ) Management API allows a Buyer to check whether the Seller is able to
+    deliver a product or set of products from among their product offerings, at the Buyer's location(s); or modify
+    a previously purchased product. This API is built from business requirements defined in MEF79.
+
+    The following operations are managed:
+    - Register for POQ Notifications
+    - Create Product Offering Qualification
+    - Retrieve POQ List
+    - Retrieve POQ by Identifier
+    (note: POQ Notification are described in a separate swagger)
+
+    The ProductOfferingQualification API used TMF 679 (v3.0) as a template.
+  title: API ProductOfferingQualificationManagement
+  version: 4.0.0
+  x-logo:
+    url: /redoc/logo.png
+    backgroundColor: '#FFFFFF'
+servers:
+- url: https://serverRoot/api/mef/productOfferingQualificationManagement/v4/
+tags:
+- description: Product Offering Qualification is part of the serviceability process.
+    The ProductOfferingQualification resource provides  means to determine whether
+    the Seller is able to deliver a product or set of products from among their product
+    offerings,  at the Buyer's location(s); or modify a previously purchased product.
+  name: ProductOfferingQualification
+- description: The Hub resource is used to manage notification subscription relating
+    to POQ.
+  name: Hub
+paths:
+  /productOfferingQualification:
+    get:
+      deprecated: false
+      description: 'The Buyer requests a list of POQs from the Seller based on a set
+        of POQ filter criteria (as described in MEF79).  For each POQ returned, the
+        Seller also provides a POQ Identifier that uniquely identifies this POQ within
+        the Seller. '
+      operationId: productOfferingQualificationFind
+      parameters:
+      - description: State of the POQ to be retrieved. See `ProductOfferingQualificationStateType`
+          definition for details
+        in: query
+        name: state
+        schema:
+          enum:
+          - done
+          - terminatedWithError.unableToProvide
+          - terminatedWithError.insufficientInformationProvided
+          - inProgress
+          type: string
+      - description: Identifier of buyer project associated to POQ
+        in: query
+        name: projectId
+        schema:
+          type: string
+      - description: POQ expected response date is strictly after this date
+        in: query
+        name: requestedResponseDate.gt
+        schema:
+          format: date-time
+          type: string
+      - description: POQ expected response date is strictly before this date
+        in: query
+        name: requestedResponseDate.lt
+        schema:
+          format: date-time
+          type: string
+      - description: Requested index for start of POQ to be provided in response requested
+          by client
+        in: query
+        name: offset
+        schema:
+          format: int32
+          type: integer
+      - description: Requested number of POQ to be provided in response requested
+          by client
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProductOfferingQualification_Find'
+                type: array
+          description: Ok
+          headers:
+            X-Total-Count:
+              description: The total number of matching POQ
+              schema:
+                format: int32
+                type: integer
+            X-Result-Count:
+              description: The number of POQ retrieved in the response
+              schema:
+                format: int32
+                type: integer
+        "400":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Bad Request
+
+            List of supported error codes:
+            - 20: Invalid URL parameter value
+            - 21: Missing body
+            - 22: Invalid body
+            - 23: Missing body field
+            - 24: Invalid body field
+            - 25: Missing header
+            - 26: Invalid header value
+            - 27: Missing query-string parameter
+            - 28: Invalid query-string parameter value
+        "401":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unauthorized
+
+            List of supported error codes:
+            - 40: Missing credentials
+            - 41: Invalid credentials
+            - 42: Expired credentials
+        "403":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Forbidden
+
+            List of supported error codes:
+            - 50: Access denied
+            - 51: Forbidden requester
+            - 52: Forbidden user
+            - 53: Too many requests
+        "404":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Not Found
+
+            List of supported error codes:
+            - 60: Resource not found
+        "408":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Request Time-out
+
+            List of supported error codes:
+            - 63: Request time-out
+        "422":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: "Unprocessable entity\n\nFunctional error\n\n\\n \n\n\\n -\
+            \ code: 100\\nmessage: Too many records retrieved - please restrict requested\
+            \ parameter value(s)\\ndescription: "
+        "500":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: Internal Server Error
+        "503":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |+
+            Service Unavailable
+
+      summary: Retrieve a list of ProductOfferingQualifications based on a set of
+        criteria
+      tags:
+      - ProductOfferingQualification
+    post:
+      deprecated: false
+      description: A request initiated by the Buyer to determine whether the Seller
+        is able to deliver a product or set of products from among their product offerings,
+        at the Buyer's location(s); or modify a previously purchased product. The
+        Seller also provides estimated time intervals to complete these deliveries.
+      operationId: productOfferingQualificationCreate
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/ProductOfferingQualification_Create'
+        description: POQ content provided by the Buyer. See definition's description
+          for details.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ProductOfferingQualification'
+          description: Created
+        "400":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Bad Request
+
+            List of supported error codes:
+            - 20: Invalid URL parameter value
+            - 21: Missing body
+            - 22: Invalid body
+            - 23: Missing body field
+            - 24: Invalid body field
+            - 25: Missing header
+            - 26: Invalid header value
+            - 27: Missing query-string parameter
+            - 28: Invalid query-string parameter value
+        "401":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unauthorized
+
+            List of supported error codes:
+            - 40: Missing credentials
+            - 41: Invalid credentials
+            - 42: Expired credentials
+        "403":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Forbidden
+
+            List of supported error codes:
+            - 50: Access denied
+            - 51: Forbidden requester
+            - 52: Forbidden user
+            - 53: Too many requests
+        "404":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Not Found
+
+            List of supported error codes:
+            - 60: Resource not found
+        "408":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Request Time-out
+
+            List of supported error codes:
+            - 63: Request time-out
+        "422":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: "Unprocessable entity\n\nFunctional error\n\n\\n \n\n\\n -\
+            \ code: 100\\nmessage: A relatedParty - at productOfferingQualification\
+            \ level - with a role 'Buyer' must be provided (including contact information)\\\
+            ndescription: \n\n\\n - code: 101\\nmessage: A least a productOffering\
+            \ OR a productSpecification OR a Product must be provided for a POQItem\\\
+            ndescription: \n\n\\n - code: 102\\nmessage: Provided Product Offering\
+            \ Identifier is unknown\\ndescription: \n\n\\n - code: 103\\nmessage:\
+            \ Provided Product Specification Identifier is unknown\\ndescription:\
+            \ \n\n\\n - code: 104\\nmessage: Provided Product Identifier is unknown\\\
+            ndescription: \n\n\\n - code: 105\\nmessage: The place information provided\
+            \ are invalid\\ndescription: \n\n\\n - code: 106\\nmessage: A least one\
+            \ date provided is invalid\\ndescription: \n\n\\n - code: 107\\nmessage:\
+            \ Incorrect related party role provided\\ndescription: "
+        "500":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: Internal Server Error
+        "503":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |+
+            Service Unavailable
+
+      summary: Create a ProductOfferingQualification
+      tags:
+      - ProductOfferingQualification
+      x-codegen-request-body-name: ProductOfferingQualification
+  /productOfferingQualification/{ProductOfferingQualificationId}:
+    get:
+      deprecated: false
+      description: 'The Buyer requests the full details of a single Product Offering
+        Qualification based on a POQ identifier. '
+      operationId: productOfferingQualificationGet
+      parameters:
+      - in: path
+        name: ProductOfferingQualificationId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ProductOfferingQualification'
+          description: Ok
+        "400":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Bad Request
+
+            List of supported error codes:
+            - 20: Invalid URL parameter value
+            - 21: Missing body
+            - 22: Invalid body
+            - 23: Missing body field
+            - 24: Invalid body field
+            - 25: Missing header
+            - 26: Invalid header value
+            - 27: Missing query-string parameter
+            - 28: Invalid query-string parameter value
+        "401":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unauthorized
+
+            List of supported error codes:
+            - 40: Missing credentials
+            - 41: Invalid credentials
+            - 42: Expired credentials
+        "403":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Forbidden
+
+            List of supported error codes:
+            - 50: Access denied
+            - 51: Forbidden requester
+            - 52: Forbidden user
+            - 53: Too many requests
+        "404":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Not Found
+
+            List of supported error codes:
+            - 60: Resource not found
+        "408":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Request Time-out
+
+            List of supported error codes:
+            - 63: Request time-out
+        "422":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unprocessable entity
+
+            Functional error
+        "500":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: Internal Server Error
+        "503":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |+
+            Service Unavailable
+
+      summary: Get a ProductOfferingQualification based on its id
+      tags:
+      - ProductOfferingQualification
+  /hub:
+    get:
+      deprecated: false
+      description: This operation retrieves a set of hubs.
+      operationId: hubFind
+      responses:
+        "200":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Hub'
+                type: array
+          description: Ok
+        "400":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Bad Request
+
+            List of supported error codes:
+            - 20: Invalid URL parameter value
+            - 21: Missing body
+            - 22: Invalid body
+            - 23: Missing body field
+            - 24: Invalid body field
+            - 25: Missing header
+            - 26: Invalid header value
+            - 27: Missing query-string parameter
+            - 28: Invalid query-string parameter value
+        "401":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unauthorized
+
+            List of supported error codes:
+            - 40: Missing credentials
+            - 41: Invalid credentials
+            - 42: Expired credentials
+        "403":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Forbidden
+
+            List of supported error codes:
+            - 50: Access denied
+            - 51: Forbidden requester
+            - 52: Forbidden user
+            - 53: Too many requests
+        "404":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Not Found
+
+            List of supported error codes:
+            - 60: Resource not found
+        "408":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Request Time-out
+
+            List of supported error codes:
+            - 63: Request time-out
+        "422":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unprocessable entity
+
+            Functional error
+        "500":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: Internal Server Error
+        "503":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |+
+            Service Unavailable
+
+      summary: hubFind
+      tags:
+      - Hub
+    post:
+      deprecated: false
+      description: A request initiated by the Buyer to instruct the Seller to send
+        notifications of POQ state changes in the event the Seller uses the Deferred
+        Response pattern to respond to a Create Product Offering Qualification request.
+      operationId: hubCreate
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/HubInput'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Hub'
+          description: Created
+        "400":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Bad Request
+
+            List of supported error codes:
+            - 20: Invalid URL parameter value
+            - 21: Missing body
+            - 22: Invalid body
+            - 23: Missing body field
+            - 24: Invalid body field
+            - 25: Missing header
+            - 26: Invalid header value
+            - 27: Missing query-string parameter
+            - 28: Invalid query-string parameter value
+        "401":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unauthorized
+
+            List of supported error codes:
+            - 40: Missing credentials
+            - 41: Invalid credentials
+            - 42: Expired credentials
+        "403":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Forbidden
+
+            List of supported error codes:
+            - 50: Access denied
+            - 51: Forbidden requester
+            - 52: Forbidden user
+            - 53: Too many requests
+        "404":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Not Found
+
+            List of supported error codes:
+            - 60: Resource not found
+        "408":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Request Time-out
+
+            List of supported error codes:
+            - 63: Request time-out
+        "422":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unprocessable entity
+
+            Functional error
+        "500":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: Internal Server Error
+        "503":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |+
+            Service Unavailable
+
+      summary: hubCreate
+      tags:
+      - Hub
+      x-codegen-request-body-name: Hub
+  /hub/{HubId}:
+    delete:
+      deprecated: false
+      description: This operation is used to delete a hub.
+      operationId: hubDelete
+      parameters:
+      - in: path
+        name: HubId
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+        "400":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Bad Request
+
+            List of supported error codes:
+            - 20: Invalid URL parameter value
+            - 21: Missing body
+            - 22: Invalid body
+            - 23: Missing body field
+            - 24: Invalid body field
+            - 25: Missing header
+            - 26: Invalid header value
+            - 27: Missing query-string parameter
+            - 28: Invalid query-string parameter value
+        "401":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unauthorized
+
+            List of supported error codes:
+            - 40: Missing credentials
+            - 41: Invalid credentials
+            - 42: Expired credentials
+        "403":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Forbidden
+
+            List of supported error codes:
+            - 50: Access denied
+            - 51: Forbidden requester
+            - 52: Forbidden user
+            - 53: Too many requests
+        "404":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Not Found
+
+            List of supported error codes:
+            - 60: Resource not found
+        "408":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Request Time-out
+
+            List of supported error codes:
+            - 63: Request time-out
+        "422":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |-
+            Unprocessable entity
+
+            Functional error
+        "500":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: Internal Server Error
+        "503":
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorRepresentation'
+          description: |+
+            Service Unavailable
+
+      summary: hubDelete
+      tags:
+      - Hub
+components:
+  schemas:
+    ServiceabilityColor:
+      description: A color that indicates confidence to service the request.
+      enum:
+      - green
+      - red
+      - yellow
+      type: string
+    ProductOfferingQualificationStateType:
+      description: These values represent the valid states through which the product
+        offering qualification can transition
+      enum:
+      - done
+      - terminatedWithError.unableToProvide
+      - terminatedWithError.insufficientInformationProvided
+      - inProgress
+      type: string
+    TimeUnit:
+      description: Represents a unit of time.
+      enum:
+      - calendarDays
+      - calendarHours
+      - calendarMinutes
+      - businessDays
+      - businessHours
+      - businessMinutes
+      type: string
+    ProductActionType:
+      description: |
+        Action to be performed on the Product Item. The action types are described in MEF 79 Sec 8.4.1.1.
+        The following mapping has been used between `ProductActionType` and MEF 79:
+        | ProductActionType | MEF 79     |
+        ------------------- | ---------- |
+        | add               | INSTALL    |
+        | change            | CHANGE     |
+        | remove            | DISCONNECT |
+        | noChange          | N/A        |
+      enum:
+      - add
+      - change
+      - remove
+      - noChange
+      type: string
+    ProductOfferingQualificationItemStateType:
+      description: POQ item states - The specific states are managed by the Seller
+        based on its processing and/or based on Buyer's action.
+      enum:
+      - done
+      - terminatedWithError.unableToProvide
+      - terminatedWithError.insufficientInformationProvided
+      - inProgress
+      type: string
+    ErrorRepresentation:
+      description: Standard Class used to describe API response error
+      properties:
+        code:
+          description: Application related code (as defined in the API or from a common
+            list)
+          format: int32
+          type: integer
+        reason:
+          description: Text that explains the reason for error. This can be shown
+            to a client user.
+          type: string
+        message:
+          description: Text that provide mode details and corrective actions related
+            to the error. This can be shown to a client user.
+          type: string
+        status:
+          description: Http error code extension like 400-2 for example
+          type: string
+        referenceError:
+          description: url pointing to documentation describing the error
+          type: string
+        '@type':
+          description: When sub-classing, this defines the sub-class entity name
+          type: string
+        '@schemaLocation':
+          description: Link to the schema describing the REST resource Used to extend
+            Error class
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    TerminationError:
+      description: Termination error may be provided if seller is unable to perform
+        qualification
+      example:
+        id: id
+        value: value
+      properties:
+        id:
+          description: Id of the termination error
+          type: string
+        value:
+          description: Value (text) for the termination error
+          type: string
+      type: object
+    RelatedParty:
+      description: An entity or organization that is involved in the product offering
+        qualification. It may be the "Buyer", the "Seller", or other related party
+      example:
+        number: number
+        emailAddress: emailAddress
+        '@referredType': '@referredType'
+        role:
+        - role
+        - role
+        '@type': '@type'
+        name: name
+        numberExtension: numberExtension
+        id: id
+      properties:
+        id:
+          description: Id of the party
+          type: string
+        name:
+          description: Name of the party
+          type: string
+        role:
+          description: Role for this party for this product offering qualification  (as
+            “Technical contact” or “Implementation Contact” for example)
+          items:
+            type: string
+          type: array
+        number:
+          description: Party phone number
+          type: string
+        numberExtension:
+          description: Party phone number extension
+          type: string
+        emailAddress:
+          description: Party email address
+          type: string
+        '@type':
+          description: When sub-classing, this defines the sub-class entity name
+          type: string
+        '@referredType':
+          description: The actual type of the target instance when needed for disambiguation.
+          type: string
+      required:
+      - name
+      - number
+      - role
+      type: object
+    ProductOfferingRef:
+      description: The commercial and technical details of a Product sold by a particular
+        Seller.  A Product Offering defines all of the commercial terms and, through
+        association with a particular Product Specification, defines all the technical
+        attributes and behaviors of the Product. A Product Offering may constrain
+        the allowable set of configurable technical attributes and/or behaviors specified
+        in the associated Product Specification.
+      example:
+        '@referredType': '@referredType'
+        id: id
+      properties:
+        id:
+          description: id of a productOffering
+          type: string
+        '@referredType':
+          description: The actual type of the target instance when needed for disambiguation.
+          type: string
+      type: object
+    Describing:
+      description: Target to the schema describing the product spec resource (and
+        type)
+      example:
+        '@type': '@type'
+        '@schemaLocation': '@schemaLocation'
+      properties:
+        '@type':
+          description: Indicates the (class) type of resource
+          type: string
+        '@schemaLocation':
+          description: This field provided a link to the schema describing this REST
+            resource.
+          type: string
+      type: object
+    AlternateProductProposal:
+      description: If in the request the buyer has requested to have alternate product
+        proposals, then this class represents these proposals.
+      example:
+        productSpecification:
+          '@referredType': '@referredType'
+          describing:
+            '@type': '@type'
+            '@schemaLocation': '@schemaLocation'
+          id: id
+        eligibleProductOffering:
+        - '@referredType': '@referredType'
+          id: id
+        - '@referredType': '@referredType'
+          id: id
+        installationInterval:
+          amount: 0
+        '@type': '@type'
+        id: id
+      properties:
+        id:
+          description: Identifier of the Product Offering Qualification alternate
+            proposal
+          type: string
+        productSpecification:
+          $ref: '#/components/schemas/ProductSpecificationRef'
+        eligibleProductOffering:
+          items:
+            $ref: '#/components/schemas/ProductOfferingRef'
+          type: array
+        installationInterval:
+          $ref: '#/components/schemas/TimeInterval'
+        '@type':
+          description: Technical attribute to extend the class.
+          type: string
+      required:
+      - id
+      type: object
+    ProductRelationship:
+      description: Indicates a relationship between products.
+      example:
+        product:
+          buyerProductId: buyerProductId
+          id: id
+          href: href
+        type: type
+      properties:
+        type:
+          description: Indicates whether the product is "bundled", "relies on", or
+            "comesFrom" another product.
+          type: string
+        product:
+          $ref: '#/components/schemas/ProductRef'
+      required:
+      - product
+      - type
+      type: object
+    ProductSpecificationRef:
+      description: A structured set of well-defined technical attributes and/or behaviors
+        that are used to construct a Product Offering for sale to a market.
+      example:
+        '@referredType': '@referredType'
+        describing:
+          '@type': '@type'
+          '@schemaLocation': '@schemaLocation'
+        id: id
+      properties:
+        id:
+          description: Unique identifier of the product specification
+          type: string
+        describing:
+          $ref: '#/components/schemas/Describing'
+        '@referredType':
+          description: The actual type of the target instance when needed for disambiguation.
+          type: string
+      type: object
+    Product:
+      description: One or more services sold to a Buyer by a Seller.  A particular
+        Product Offering defines the technical and commercial attributes and behaviors
+        of a Product.
+      discriminator:
+        propertyName: '@type'
+      example:
+        productSpecification:
+          '@referredType': '@referredType'
+          describing:
+            '@type': '@type'
+            '@schemaLocation': '@schemaLocation'
+          id: id
+        '@type': '@type'
+        productRelationship:
+        - product:
+            buyerProductId: buyerProductId
+            id: id
+            href: href
+          type: type
+        - product:
+            buyerProductId: buyerProductId
+            id: id
+            href: href
+          type: type
+        id: id
+        href: href
+        place:
+        - role: role
+          '@type': '@type'
+        - role: role
+          '@type': '@type'
+      properties:
+        id:
+          description: Unique identifier of the product
+          type: string
+        href:
+          description: Link to product
+          type: string
+        productRelationship:
+          items:
+            $ref: '#/components/schemas/ProductRelationship'
+          type: array
+        productSpecification:
+          $ref: '#/components/schemas/ProductSpecificationRef'
+        place:
+          items:
+            $ref: '#/components/schemas/RelatedPlaceRefOrValue'
+          type: array
+        '@type':
+          description: When sub-classing, this defines the sub-class entity name
+          type: string
+      type: object
+    ProductOfferingQualificationItem:
+      description: An individual article included in a POQ that describes a Product
+        of a particular type (Product Offering) being delivered to a specific geographical
+        location.  The objective is to determine if it is feasible for the Seller
+        to deliver this item as described and for the Seller to inform the Buyer of
+        the estimated time interval to complete this delivery.
+      example:
+        product:
+          productSpecification:
+            '@referredType': '@referredType'
+            describing:
+              '@type': '@type'
+              '@schemaLocation': '@schemaLocation'
+            id: id
+          '@type': '@type'
+          productRelationship:
+          - product:
+              buyerProductId: buyerProductId
+              id: id
+              href: href
+            type: type
+          - product:
+              buyerProductId: buyerProductId
+              id: id
+              href: href
+            type: type
+          id: id
+          href: href
+          place:
+          - role: role
+            '@type': '@type'
+          - role: role
+            '@type': '@type'
+        productOffering:
+          '@referredType': '@referredType'
+          id: id
+        '@type': '@type'
+        serviceConfidenceReason: serviceConfidenceReason
+        alternateProductProposal:
+        - productSpecification:
+            '@referredType': '@referredType'
+            describing:
+              '@type': '@type'
+              '@schemaLocation': '@schemaLocation'
+            id: id
+          eligibleProductOffering:
+          - '@referredType': '@referredType'
+            id: id
+          - '@referredType': '@referredType'
+            id: id
+          installationInterval:
+            amount: 0
+          '@type': '@type'
+          id: id
+        - productSpecification:
+            '@referredType': '@referredType'
+            describing:
+              '@type': '@type'
+              '@schemaLocation': '@schemaLocation'
+            id: id
+          eligibleProductOffering:
+          - '@referredType': '@referredType'
+            id: id
+          - '@referredType': '@referredType'
+            id: id
+          installationInterval:
+            amount: 0
+          '@type': '@type'
+          id: id
+        stateChange:
+        - changeReason: changeReason
+          changeDate: 2000-01-23T04:56:07.000+00:00
+        - changeReason: changeReason
+          changeDate: 2000-01-23T04:56:07.000+00:00
+        relatedParty:
+        - number: number
+          emailAddress: emailAddress
+          '@referredType': '@referredType'
+          role:
+          - role
+          - role
+          '@type': '@type'
+          name: name
+          numberExtension: numberExtension
+          id: id
+        - number: number
+          emailAddress: emailAddress
+          '@referredType': '@referredType'
+          role:
+          - role
+          - role
+          '@type': '@type'
+          name: name
+          numberExtension: numberExtension
+          id: id
+        terminationError:
+        - id: id
+          value: value
+        - id: id
+          value: value
+        eligibleProductOffering:
+        - '@referredType': '@referredType'
+          id: id
+        - '@referredType': '@referredType'
+          id: id
+        installationInterval:
+          amount: 0
+        guaranteedUntilDate: 2000-01-23T04:56:07.000+00:00
+        id: id
+        productOfferingQualificationItemRelationship:
+        - id: id
+          type: type
+        - id: id
+          type: type
+      properties:
+        id:
+          description: Id of this POQ item
+          type: string
+        state:
+          $ref: '#/components/schemas/ProductOfferingQualificationItemStateType'
+        action:
+          $ref: '#/components/schemas/ProductActionType'
+        serviceabilityConfidence:
+          $ref: '#/components/schemas/ServiceabilityColor'
+        serviceConfidenceReason:
+          description: A description of the reason a particular color is being provided.
+            This may include a specific standard reason codes and descriptions.
+          type: string
+        installationInterval:
+          $ref: '#/components/schemas/TimeInterval'
+        guaranteedUntilDate:
+          description: Date until seller is guaranted the qualification result.
+          format: date-time
+          type: string
+        product:
+          $ref: '#/components/schemas/Product'
+        productOffering:
+          $ref: '#/components/schemas/ProductOfferingRef'
+        relatedParty:
+          items:
+            $ref: '#/components/schemas/RelatedParty'
+          type: array
+        eligibleProductOffering:
+          items:
+            $ref: '#/components/schemas/ProductOfferingRef'
+          type: array
+        productOfferingQualificationItemRelationship:
+          items:
+            $ref: '#/components/schemas/ProductOfferingQualificationItemRelationship'
+          type: array
+        alternateProductProposal:
+          items:
+            $ref: '#/components/schemas/AlternateProductProposal'
+          type: array
+        terminationError:
+          items:
+            $ref: '#/components/schemas/TerminationError'
+          type: array
+        stateChange:
+          items:
+            $ref: '#/components/schemas/ItemStateChange'
+          type: array
+        '@type':
+          description: When sub-classing, this defines the sub-class entity name
+          type: string
+      required:
+      - action
+      - id
+      - state
+      type: object
+    ProductOfferingQualification:
+      description: A grouping of POQ Items formulated into a request made by a Buyer
+        to a Seller
+      example:
+        '@type': '@type'
+        provideAlternative: true
+        stateChange:
+        - changeReason: changeReason
+          changeDate: 2000-01-23T04:56:07.000+00:00
+        - changeReason: changeReason
+          changeDate: 2000-01-23T04:56:07.000+00:00
+        relatedParty:
+        - number: number
+          emailAddress: emailAddress
+          '@referredType': '@referredType'
+          role:
+          - role
+          - role
+          '@type': '@type'
+          name: name
+          numberExtension: numberExtension
+          id: id
+        - number: number
+          emailAddress: emailAddress
+          '@referredType': '@referredType'
+          role:
+          - role
+          - role
+          '@type': '@type'
+          name: name
+          numberExtension: numberExtension
+          id: id
+        productOfferingQualificationItem:
+        - product:
+            productSpecification:
+              '@referredType': '@referredType'
+              describing:
+                '@type': '@type'
+                '@schemaLocation': '@schemaLocation'
+              id: id
+            '@type': '@type'
+            productRelationship:
+            - product:
+                buyerProductId: buyerProductId
+                id: id
+                href: href
+              type: type
+            - product:
+                buyerProductId: buyerProductId
+                id: id
+                href: href
+              type: type
+            id: id
+            href: href
+            place:
+            - role: role
+              '@type': '@type'
+            - role: role
+              '@type': '@type'
+          productOffering:
+            '@referredType': '@referredType'
+            id: id
+          '@type': '@type'
+          serviceConfidenceReason: serviceConfidenceReason
+          alternateProductProposal:
+          - productSpecification:
+              '@referredType': '@referredType'
+              describing:
+                '@type': '@type'
+                '@schemaLocation': '@schemaLocation'
+              id: id
+            eligibleProductOffering:
+            - '@referredType': '@referredType'
+              id: id
+            - '@referredType': '@referredType'
+              id: id
+            installationInterval:
+              amount: 0
+            '@type': '@type'
+            id: id
+          - productSpecification:
+              '@referredType': '@referredType'
+              describing:
+                '@type': '@type'
+                '@schemaLocation': '@schemaLocation'
+              id: id
+            eligibleProductOffering:
+            - '@referredType': '@referredType'
+              id: id
+            - '@referredType': '@referredType'
+              id: id
+            installationInterval:
+              amount: 0
+            '@type': '@type'
+            id: id
+          stateChange:
+          - changeReason: changeReason
+            changeDate: 2000-01-23T04:56:07.000+00:00
+          - changeReason: changeReason
+            changeDate: 2000-01-23T04:56:07.000+00:00
+          relatedParty:
+          - number: number
+            emailAddress: emailAddress
+            '@referredType': '@referredType'
+            role:
+            - role
+            - role
+            '@type': '@type'
+            name: name
+            numberExtension: numberExtension
+            id: id
+          - number: number
+            emailAddress: emailAddress
+            '@referredType': '@referredType'
+            role:
+            - role
+            - role
+            '@type': '@type'
+            name: name
+            numberExtension: numberExtension
+            id: id
+          terminationError:
+          - id: id
+            value: value
+          - id: id
+            value: value
+          eligibleProductOffering:
+          - '@referredType': '@referredType'
+            id: id
+          - '@referredType': '@referredType'
+            id: id
+          installationInterval:
+            amount: 0
+          guaranteedUntilDate: 2000-01-23T04:56:07.000+00:00
+          id: id
+          productOfferingQualificationItemRelationship:
+          - id: id
+            type: type
+          - id: id
+            type: type
+        - product:
+            productSpecification:
+              '@referredType': '@referredType'
+              describing:
+                '@type': '@type'
+                '@schemaLocation': '@schemaLocation'
+              id: id
+            '@type': '@type'
+            productRelationship:
+            - product:
+                buyerProductId: buyerProductId
+                id: id
+                href: href
+              type: type
+            - product:
+                buyerProductId: buyerProductId
+                id: id
+                href: href
+              type: type
+            id: id
+            href: href
+            place:
+            - role: role
+              '@type': '@type'
+            - role: role
+              '@type': '@type'
+          productOffering:
+            '@referredType': '@referredType'
+            id: id
+          '@type': '@type'
+          serviceConfidenceReason: serviceConfidenceReason
+          alternateProductProposal:
+          - productSpecification:
+              '@referredType': '@referredType'
+              describing:
+                '@type': '@type'
+                '@schemaLocation': '@schemaLocation'
+              id: id
+            eligibleProductOffering:
+            - '@referredType': '@referredType'
+              id: id
+            - '@referredType': '@referredType'
+              id: id
+            installationInterval:
+              amount: 0
+            '@type': '@type'
+            id: id
+          - productSpecification:
+              '@referredType': '@referredType'
+              describing:
+                '@type': '@type'
+                '@schemaLocation': '@schemaLocation'
+              id: id
+            eligibleProductOffering:
+            - '@referredType': '@referredType'
+              id: id
+            - '@referredType': '@referredType'
+              id: id
+            installationInterval:
+              amount: 0
+            '@type': '@type'
+            id: id
+          stateChange:
+          - changeReason: changeReason
+            changeDate: 2000-01-23T04:56:07.000+00:00
+          - changeReason: changeReason
+            changeDate: 2000-01-23T04:56:07.000+00:00
+          relatedParty:
+          - number: number
+            emailAddress: emailAddress
+            '@referredType': '@referredType'
+            role:
+            - role
+            - role
+            '@type': '@type'
+            name: name
+            numberExtension: numberExtension
+            id: id
+          - number: number
+            emailAddress: emailAddress
+            '@referredType': '@referredType'
+            role:
+            - role
+            - role
+            '@type': '@type'
+            name: name
+            numberExtension: numberExtension
+            id: id
+          terminationError:
+          - id: id
+            value: value
+          - id: id
+            value: value
+          eligibleProductOffering:
+          - '@referredType': '@referredType'
+            id: id
+          - '@referredType': '@referredType'
+            id: id
+          installationInterval:
+            amount: 0
+          guaranteedUntilDate: 2000-01-23T04:56:07.000+00:00
+          id: id
+          productOfferingQualificationItemRelationship:
+          - id: id
+            type: type
+          - id: id
+            type: type
+        instantSyncQualification: false
+        requestedResponseDate: 2000-01-23T04:56:07.000+00:00
+        expectedResponseDate: 2000-01-23T04:56:07.000+00:00
+        id: id
+        href: href
+        effectiveQualificationCompletionDate: 2000-01-23T04:56:07.000+00:00
+        '@schemaLocation': '@schemaLocation'
+        projectId: projectId
+      properties:
+        id:
+          description: The Serviceability Request's unique identifier.
+          type: string
+        href:
+          description: Link to this POQ resource
+          type: string
+        instantSyncQualification:
+          default: false
+          description: If this flag is set to Yes, Buyer requests to have instant
+            qualificationto be provided in operation POST response
+          type: boolean
+        state:
+          $ref: '#/components/schemas/ProductOfferingQualificationStateType'
+        projectId:
+          description: This value MAY be assigned by the Buyer/Seller to identify
+            a project the serviceability request is associated with.
+          type: string
+        provideAlternative:
+          description: This Boolean allows requester (buyer) to indicate if he is
+            willing to get alternate proposal if requested product not available.
+          type: boolean
+        requestedResponseDate:
+          description: Corresponds to desiredResponseDate - The date a response for
+            the service request is desired.
+          format: date-time
+          type: string
+        expectedResponseDate:
+          description: The date the seller is expected to provide qualification result.
+          format: date-time
+          type: string
+        effectiveQualificationCompletionDate:
+          description: Effective date seller provides qualification result.
+          format: date-time
+          type: string
+        relatedParty:
+          items:
+            $ref: '#/components/schemas/RelatedParty'
+          type: array
+        productOfferingQualificationItem:
+          items:
+            $ref: '#/components/schemas/ProductOfferingQualificationItem'
+          minItems: 1
+          type: array
+        stateChange:
+          items:
+            $ref: '#/components/schemas/StateChange'
+          type: array
+        '@type':
+          description: When sub-classing, this defines the sub-class entity name
+          type: string
+        '@schemaLocation':
+          description: Technical attribute to extend the class
+          type: string
+      required:
+      - id
+      - productOfferingQualificationItem
+      - relatedParty
+      - state
+      type: object
+    ProductOfferingQualificationItemRelationship:
+      description: The relationship between product offering qualification items that
+        can be used to validate business rules between POQ Items
+      example:
+        id: id
+        type: type
+      properties:
+        type:
+          description: Type of POQ relationship
+          type: string
+        id:
+          description: id of the targeted POQ item
+          type: string
+      required:
+      - id
+      - type
+      type: object
+    ProductOfferingQualificationItem_Create:
+      description: |-
+        This structure serves as a request for a product offering qualification item
+        An individual article included in a POQ that describes a Product of a particular type (Product Offering) being delivered to a specific geographical location.  The objective is to determine if it is feasible for the Seller to deliver this item as described and for the Seller to inform the Buyer of the estimated time interval to complete this delivery.
+      properties:
+        id:
+          description: |-
+            Id of the productOfferingQualification item.
+            This id must be unique within POQ create request
+          type: string
+        action:
+          $ref: '#/components/schemas/ProductActionType'
+        product:
+          $ref: '#/components/schemas/Product'
+        productOffering:
+          $ref: '#/components/schemas/ProductOfferingRef'
+        productOfferingQualificationItemRelationship:
+          items:
+            $ref: '#/components/schemas/ProductOfferingQualificationItemRelationship'
+          type: array
+        relatedParty:
+          items:
+            $ref: '#/components/schemas/RelatedParty'
+          type: array
+        '@type':
+          description: When sub-classing, this defines the sub-class entity name
+          type: string
+      required:
+      - id
+      - product
+      type: object
+    ProductOfferingQualification_Create:
+      description: |-
+        This structure serves as a request for a product offering qualification.
+        A POQ is a grouping of POQ Items formulated into a request made by a Buyer to a Seller
+      properties:
+        provideAlternative:
+          default: false
+          description: This Boolean allows requester (buyer) to indicate if he is
+            willing to get alternate proposal if requested product not available.
+          type: boolean
+        requestedResponseDate:
+          description: Corresponds to desiredResponseDate - The date a response for
+            the service request is desired.
+          format: date-time
+          type: string
+        instantSyncQualification:
+          default: false
+          description: If this flag is set to Yes, Buyer requests to have instant
+            qualification to be provided in operation POST response
+          type: boolean
+        projectId:
+          description: This value MAY be assigned by the Buyer/Seller to identify
+            a project the qualification request is associated with.
+          type: string
+        relatedParty:
+          items:
+            $ref: '#/components/schemas/RelatedParty'
+          type: array
+        productOfferingQualificationItem:
+          items:
+            $ref: '#/components/schemas/ProductOfferingQualificationItem_Create'
+          minItems: 1
+          type: array
+        '@type':
+          description: When sub-classing, this defines the sub-class entity name
+          type: string
+        '@schemaLocation':
+          description: Technical attribute to extend this class
+          type: string
+      required:
+      - productOfferingQualificationItem
+      - relatedParty
+      type: object
+    TimeInterval:
+      description: A time interval, e.g.  3 hours, or 5 days.
+      example:
+        amount: 0
+      properties:
+        amount:
+          description: Amount
+          format: int32
+          type: integer
+        timeUnit:
+          $ref: '#/components/schemas/TimeUnit'
+      required:
+      - amount
+      - timeUnit
+      type: object
+    ProductOfferingQualification_Find:
+      description: This class is used to describe attribute to be used for requesting
+        POQ list (used in the GET by list)
+      example:
+        requestedResponseDate: 2000-01-23
+        id: id
+        projectId: projectId
+      properties:
+        id:
+          description: The Serviceability Request's unique identifier.
+          type: string
+        state:
+          $ref: '#/components/schemas/ProductOfferingQualificationStateType'
+        requestedResponseDate:
+          description: Corresponds to desiredResponseDate - The date a response for
+            the service request is desired.
+          format: date
+          type: string
+        projectId:
+          description: This value MAY be assigned by the Buyer/Seller to identify
+            a project the serviceability request is associated with.
+          type: string
+      type: object
+    RelatedPlaceRefOrValue:
+      description: Place defines the places where the products qualification must
+        be done.
+      discriminator:
+        propertyName: '@type'
+      example:
+        role: role
+        '@type': '@type'
+      properties:
+        role:
+          description: Role of this place
+          type: string
+        '@type':
+          description: |-
+            When sub-classing, this defines the sub-class entity name.
+            Used when place is described by value (litterally) then must be valued to FormattedAddress, FieldedAddress,  GeographicLocation or (external) ReferencedAddress
+            Used when place is described by reference - must be valued to PlaceRef
+          type: string
+      required:
+      - role
+      type: object
+    Hub:
+      description: This resource is used to manage notification subscription.
+      example:
+        query: query
+        callback: callback
+        id: id
+      properties:
+        id:
+          description: id of the Hub
+          type: string
+        callback:
+          description: This callback address is an url. the norification will be sent
+            to this url address
+          type: string
+        query:
+          description: 'This attribute is used to define notification type. Example:
+            ","query":”eventType = ProductOfferingQualificationStateChangeNotification”}'
+          type: string
+      required:
+      - callback
+      - id
+      - query
+      type: object
+    HubInput:
+      description: This class is used to request a HUB creation - Used in the POST
+        operation.
+      example:
+        query: query
+        callback: callback
+      properties:
+        callback:
+          description: This attribute is the callback url where event will be sent
+            when occurs, for instance an url http://yourdomain/listener/api/v1/event
+          type: string
+        query:
+          description: 'This attribute is used to define notification type. Example:
+            ","query":”eventType = ProductOfferingQualificationStateChangeNotification”}'
+          type: string
+      required:
+      - callback
+      - query
+      type: object
+    ProductRef:
+      description: Reference to an existing product in the inventory
+      example:
+        buyerProductId: buyerProductId
+        id: id
+        href: href
+      properties:
+        id:
+          description: id of the product (provided by the seller)
+          type: string
+        href:
+          description: hyerplink to the product in the inventory
+          type: string
+        buyerProductId:
+          description: Targeted Buyer product id - Informative
+          type: string
+      required:
+      - id
+      type: object
+    SubUnit:
+      properties:
+        subUnitType:
+          description: The type of subunit e.g.BERTH, FLAT, PIER, SUITE, SHOP, TOWER,
+            UNIT, WHARF.
+          type: string
+        subUnitIdentifier:
+          description: The discriminator used for the subunit, often just a simple
+            number but may also be a range.
+          type: string
+      required:
+      - subUnitIdentifier
+      - subUnitType
+      type: object
+    GeographicSubAddress:
+      description: It is used for addressing within a property in an urban area (country
+        properties are often defined differently). It may refer to a building, a building
+        cluster, or a floor of a multistory building.
+      properties:
+        id:
+          description: Unique Identifier of the subAddress
+          type: string
+        subUnit:
+          items:
+            $ref: '#/components/schemas/SubUnit'
+          type: array
+        levelType:
+          description: Describes level types within a building
+          type: string
+        levelNumber:
+          description: Used where a level type may be repeated e.g. BASEMENT 1, BASEMENT
+            2
+          type: string
+        buildingName:
+          description: Allows for buildings that have well-known names
+          type: string
+        privateStreetNumber:
+          description: Private streets numbers internal to a private street
+          type: string
+        privateStreetName:
+          description: '"Private streets internal to a property (e.g. a university)
+            may have internal names that are not recorded by the land title office'
+          type: string
+        '@type':
+          description: When sub-classing, this defines the sub-class entity name
+          type: string
+        '@schemaLocation':
+          description: Technical attribute to exend this class if needed (JSON schema
+            locator)
+          type: string
+      type: object
+    FieldedAddress:
+      allOf:
+      - $ref: '#/components/schemas/RelatedPlaceRefOrValue'
+      - $ref: '#/components/schemas/FieldedAddress_allOf'
+      description: A type of Address that has a discrete field and value for each
+        type of boundary or identifier down to the lowest level of detail. For example
+        “street number” is one field, “street name” is another field, etc.
+    FormattedAddress:
+      allOf:
+      - $ref: '#/components/schemas/RelatedPlaceRefOrValue'
+      - $ref: '#/components/schemas/FormattedAddress_allOf'
+      description: A type of Address that has discrete fields for each type of boundary
+        or identifier with the exception of street and more specific location details,
+        which are combined into a maximum of two strings based on local postal addressing
+        conventions.
+    ReferencedAddress:
+      allOf:
+      - $ref: '#/components/schemas/RelatedPlaceRefOrValue'
+      - $ref: '#/components/schemas/ReferencedAddress_allOf'
+      description: A globally unique identifier controlled by a generally accepted
+        independent administrative authority that specifies a fixed geographical location.
+    GeographicPoint:
+      properties:
+        latitude:
+          description: The latitude expressed in decimal degrees format
+          type: string
+        longitude:
+          description: The longitude expressed in decimal degrees format
+          type: string
+      required:
+      - latitude
+      - longitude
+      type: object
+    GeographicLocation:
+      allOf:
+      - $ref: '#/components/schemas/RelatedPlaceRefOrValue'
+      - $ref: '#/components/schemas/GeographicLocation_allOf'
+      description: A set of coordinates (typically including latitude and longitude)
+        that describes a particular loca-tion on earth.
+    StateChange:
+      description: Holds the state notification reasons and associated date the POQ
+        state changed, populated by the server.
+      example:
+        changeReason: changeReason
+        changeDate: 2000-01-23T04:56:07.000+00:00
+      properties:
+        changeDate:
+          format: date-time
+          type: string
+        changeReason:
+          type: string
+        state:
+          $ref: '#/components/schemas/ProductOfferingQualificationStateType'
+      type: object
+    ItemStateChange:
+      description: Holds the state notification reasons and associated date the POQ
+        item state changed, populated by the server.
+      example:
+        changeReason: changeReason
+        changeDate: 2000-01-23T04:56:07.000+00:00
+      properties:
+        changeDate:
+          format: date-time
+          type: string
+        changeReason:
+          type: string
+        state:
+          $ref: '#/components/schemas/ProductOfferingQualificationItemStateType'
+      type: object
+    PlaceRef:
+      allOf:
+      - $ref: '#/components/schemas/RelatedPlaceRefOrValue'
+      - $ref: '#/components/schemas/PlaceRef_allOf'
+      description: This class must be used when a place is provided by reference.
+    objCosBWP:
+      description: 2-tuple of CoS Name and Bandwidth Profile.
+      properties: {}
+      type: object
+    objBWP:
+      description: The MEF Bandwidth Profile 11-tuple as described in MEF 10.4 section
+        12.1.2. (MEF 10.4 actually defines a 10-tuple where Envelope Name and Rank
+        are a single attribute).
+      properties: {}
+      type: object
+    objVlanMap:
+      description: ALL (for port-based service) or a list of VLAN ranges
+      properties: {}
+      type: object
+    objOvcEP:
+      description: An OVC End Point is a logical entity at a given External Interface
+        that is associated with a distinct set of frames passing over that External
+        Interface.
+      properties:
+        externalInterfaceType:
+          description: OVC End Point External Interface Type - MEF 26.2 §16.2
+          enum:
+          - UNI
+          - ENNI
+          type: string
+        ovcEndPointMap:
+          description: ALL (for port-based service) or a list of VLAN ranges
+          properties: {}
+          type: object
+        ingressClassOfServiceMap:
+          description: OVC End Point Class of Service Identifier - MEF 26.2 §16.6
+          type: string
+        colorMap:
+          description: OVC End Point Color Identifier - MEF 26.2 §16.7
+          type: string
+        egressMap:
+          description: OVC End Point Egress Map - MEF 26.2 §16.8
+          type: string
+        ingressBandwidthProfilePerEndPoint:
+          description: The MEF Bandwidth Profile 11-tuple as described in MEF 10.4
+            section 12.1.2. (MEF 10.4 actually defines a 10-tuple where Envelope Name
+            and Rank are a single attribute).
+          properties: {}
+          type: object
+        ingressBandwidthProfilePerClassOfServiceName:
+          description: Ingress Bandwidth Profile per Class of Service Name Service
+            Attribute - MEF 26.2 §16.12
+          items:
+            $ref: '#/components/schemas/objCosBWP'
+          maxItems: 8
+          minItems: 1
+          type: array
+        aggregationLinkDepth:
+          description: A 2-tuple {SVID, Depth} that indicates at the ENNI how many
+            LAG links can be used by the SVID (one at a time).
+          properties: {}
+          type: object
+        sourceAddressMacLimit:
+          description: OVC End Point Source MAC Address Limit - MEF 26.2 §16.15
+          type: string
+        megIntermediatePoint:
+          description: OVC End Point MIP - MEF 26.2 §16.16
+          enum:
+          - ENABLED
+          - DISABLED
+          type: string
+        maintenanceEndPointList:
+          description: OVC End Point Maintenance End Point List - MEF 26.2 §16.17
+          items:
+            $ref: '#/components/schemas/objMEPspec'
+          maxItems: 7
+          minItems: 0
+          type: array
+      type: object
+    objLinkDepth:
+      description: A 2-tuple {SVID, Depth} that indicates at the ENNI how many LAG
+        links can be used by the SVID (one at a time).
+      properties: {}
+      type: object
+    Sonata-AEL-POQ:
+      allOf:
+      - $ref: '#/components/schemas/Product'
+      - $ref: '#/components/schemas/MEF_LSO_Sonata_Schema_for_Access_E_Line__OVC____Function__POQ'
+    objMEPspec:
+      description: A 2-tuple for a MEP at an interface containing MEG level and direction
+      properties: {}
+      type: object
+    FieldedAddress_allOf:
+      properties:
+        streetNr:
+          description: Number identifying a specific property on a public street.
+            It may be combined with streetNrLast for ranged addresses
+          type: string
+        streetNrSuffix:
+          description: The first street number suffix
+          type: string
+        streetNrLast:
+          description: Last number in a range of street numbers allocated to a property
+          type: string
+        streetNrLastSuffix:
+          description: Last street number suffix for a ranged address
+          type: string
+        streetName:
+          description: Name of the street or other street type
+          type: string
+        streetType:
+          description: Alley, avenue, boulevard, brae, crescent, drive, highway, lane,
+            terrace, parade, place, tarn, way, wharf
+          type: string
+        streetSuffix:
+          description: A modifier denoting a relative direction
+          type: string
+        locality:
+          description: The locality that the address is in
+          type: string
+        city:
+          description: The city that the address is in
+          type: string
+        stateOrProvince:
+          description: The State or Province that the address is in
+          type: string
+        postcode:
+          description: Descriptor for a postal delivery area, used to speed and simplify
+            the delivery of mail (also known as zipcode)
+          type: string
+        postcodeExtension:
+          description: An extension of a postal code. E.g. the part following the
+            dash in an american urban property address
+          type: string
+        country:
+          description: Country that the address is in
+          type: string
+        geographicSubAddress:
+          $ref: '#/components/schemas/GeographicSubAddress'
+      required:
+      - city
+      - country
+      - postcode
+      - stateOrProvince
+      - streetType
+    FormattedAddress_allOf:
+      properties:
+        addrLine1:
+          description: The first address line in a formatted address
+          type: string
+        addrLine2:
+          description: The second address line in a formatted address
+          type: string
+        locality:
+          description: An area of defined or undefined boundaries within a local authority
+            or other legislatively defined area, usually rural or semi rural in nature
+          type: string
+        city:
+          description: The city that the address is in
+          type: string
+        stateOrProvince:
+          description: The State or Province that the address is in
+          type: string
+        postcode:
+          description: Descriptor for a postal delivery area, used to speed and simplify
+            the delivery of mail (also known as ZIP code)
+          type: string
+        postcodeExtension:
+          description: An extension of a postal code. E.g. the part following the
+            dash in an American urban property address
+          type: string
+        country:
+          description: Country that the address is in
+          type: string
+      required:
+      - addrLine1
+      - city
+      - country
+      - postcode
+      - stateOrProvince
+    ReferencedAddress_allOf:
+      properties:
+        externalReferenceType:
+          description: The type of the reference. For North American providers this
+            would normally be CLLI
+          type: string
+        externalReferenceId:
+          description: A reference to an address by id; this would include such things
+            as CLLI Codes, or Seller-assigned address identifiers
+          type: string
+      required:
+      - externalReferenceId
+      - externalReferenceType
+    GeographicLocation_allOf:
+      properties:
+        spatialRef:
+          description: The spatial reference system used to determine the coordinates
+          type: string
+        geographicPoint:
+          $ref: '#/components/schemas/GeographicPoint'
+      required:
+      - geographicPoint
+      - spatialRef
+    PlaceRef_allOf:
+      properties:
+        id:
+          description: Identifier of the referenced place
+          type: string
+        href:
+          description: Hyperlink to the referenced place
+          type: string
+        '@referredType':
+          description: Type of the referenced place (like GeographicAddress or GeographicSite)
+          type: string
+      required:
+      - '@referredType'
+      - id
+    MEF_LSO_Sonata_Schema_for_Access_E_Line__OVC____Function__POQ:
+      description: OVC Service Attributes control the behavior observable at and between
+        External Interfaces to the Carrier Ethernet Network (CEN). The behaviors are
+        achieved by the Network Operator and the Operator's client (the Service Provider
+        in this case) agreeing on the value for each of the Service Attributes.
+      properties:
+        role:
+          description: Schema role - MEF 57.2 §9.12.1 (under devel)
+          enum:
+          - ovc
+          type: object
+        maximumFrameSize:
+          description: OVC Maximum Frame Size - MEF 26.2 §12.6
+          minimum: 1526
+          type: integer
+        ceVlanIdPreservation:
+          description: OVC CE-VLAN ID Preservation - MEF 26.2 §12.7
+          enum:
+          - PRESERVE
+          - STRIP
+          - RETAIN
+          type: object
+        cTagPcpPreservation:
+          description: OVC CE-VLAN PCP Preservation - MEF 26.2 §12.8
+          enum:
+          - ENABLED
+          - DISABLED
+          type: object
+        cTagDeiPreservation:
+          description: OVC CE-VLAN DEI Preservation - MEF 26.2 §12.9
+          enum:
+          - ENABLED
+          - DISABLED
+          type: object
+        listOfClassOfServiceNames:
+          description: OVC List of Class of Service Names - MEF 26.2 §12.12
+          items:
+            type: string
+          maxItems: 8
+          minItems: 1
+          type: array
+          uniqueItems: true
+        carrierEthernetSls:
+          description: OVC Service Level Specification - MEF 26.2 §12.13
+          type: string
+        availableMegLevel:
+          description: OVC Available MEG Level - MEF 26.2 §12.15
+          maximum: 6
+          minimum: 0
+          type: number
+        l2cpAddressSet:
+          description: OVC L2CP Address Set - MEF 45 §8.1 and MEF 26.2 §12.16
+          enum:
+          - CTA
+          - CTB
+          - CTB2
+          type: object
+        uniEP:
+          $ref: '#/components/schemas/objOvcEP'
+        enniEP:
+          $ref: '#/components/schemas/objOvcEP'
+      required:
+      - enniEP
+      - role
+      - uniEP
