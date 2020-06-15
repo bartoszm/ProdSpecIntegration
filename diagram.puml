@@ -1,0 +1,58 @@
+@startuml
+
+skinparam class {
+    BackgroundColor<<ProdSpec>> PaleGreen
+    BorderColor<<ProdSpec>> SpringGreen
+}
+
+class ProductOfferingQualification_Create {
+  instantSyncQualification  : boolean
+  projectId  : string
+  provideAlternative  : boolean
+  requestedResponseDate  : date-time
+}
+
+class ProductOfferingQualificationItem_Create {
+  id * : string
+  action * : ProductActionType
+  productOffering  : ProductOfferingRef
+}
+
+ProductOfferingQualification_Create *-- "1..*" ProductOfferingQualificationItem_Create  :  productOfferingQualificationItem
+
+class Product {
+  id  : string
+  href  : string
+}
+
+Product *-- ProductRelationship  :  productRelationship
+Product -- "0..1" ProductSpecificationRef  :  productSpecification
+Product *-- RelatedPlaceRefOrValue  :  place
+
+ProductOfferingQualificationItem_Create *-- "1..1" Product  :  productOfferingQualificationItem
+
+class MEFProductPlaceholder {
+    @type : string <<discriminator>>
+}
+
+Product *-- "1..1" MEFProductPlaceholder : mefAttributes
+ 
+class "Sonata-AEL-POQ" <<ProdSpec>> {
+    role
+    maximumFrameSize
+    ceVlanIdPreservation
+    cTagPcpPreservation
+    cTagDeiPreservation
+    listOfClassOfServiceNames: [] string 
+    carrierEthernetSls
+    availableMegLevel
+    l2cpAddressSet
+    uniEP
+    enniEP
+}
+
+MEFProductPlaceholder <|-- "Sonata-AEL-POQ"
+
+
+
+@enduml
