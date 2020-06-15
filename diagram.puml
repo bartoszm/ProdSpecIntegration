@@ -1,0 +1,78 @@
+@startuml
+
+skinparam class {
+
+BackgroundColor<<ProdSpec>> PaleGreen
+BorderColor<<ProdSpec>> SpringGreen
+}
+
+class ProductOfferingQualification_Create {
+  instantSyncQualification  : boolean
+  projectId  : string
+  provideAlternative  : boolean
+  requestedResponseDate  : date-time
+}
+
+class ProductOfferingQualificationItem_Create {
+  id * : string
+  action * : ProductActionType
+  productOffering  : ProductOfferingRef
+}
+
+ProductOfferingQualification_Create *-- "1..*" ProductOfferingQualificationItem_Create  :  productOfferingQualificationItem
+
+class Product {
+  id  : string
+  href  : string
+}
+Product *-- ProductRelationship  :  productRelationship
+Product -- "0..1" ProductSpecificationRef  :  productSpecification
+Product *-- RelatedPlaceRefOrValue  :  place
+
+ProductOfferingQualificationItem_Create *-- "1..1" Product  :  productOfferingQualificationItem
+
+class "Sonata-AEL-POQ" <<ProdSpec>> {
+    role
+    maximumFrameSize
+    ceVlanIdPreservation
+    cTagPcpPreservation
+    cTagDeiPreservation
+    listOfClassOfServiceNames: [] string 
+    carrierEthernetSls
+    availableMegLevel
+    l2cpAddressSet
+    uniEP
+    enniEP
+}
+
+class Characteristic {
+  id  : string
+  name * : string
+  valueType  : string
+  @baseType  : string
+  @type * : string
+  @schemaLocation  : string
+
+}
+note right of Characteristic 
+    <b>valueType</b> determines type
+    of the embedded MEF product 
+end note
+
+class MapCharacteristic {
+  value * : object
+
+}
+
+Product *-- "1..1" MapCharacteristic : productCharacteristics
+note on link: Usage in MEF context
+Characteristic <|-- MapCharacteristic
+
+
+class Object {}
+MapCharacteristic *-> "1..1" Object : value
+Object <|-- "Sonata-AEL-POQ"
+
+
+
+@enduml
