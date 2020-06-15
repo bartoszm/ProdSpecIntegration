@@ -997,8 +997,6 @@ components:
       description: One or more services sold to a Buyer by a Seller.  A particular
         Product Offering defines the technical and commercial attributes and behaviors
         of a Product.
-      discriminator:
-        propertyName: '@type'
       example:
         productSpecification:
           '@referredType': '@referredType'
@@ -1025,6 +1023,8 @@ components:
           '@type': '@type'
         - role: role
           '@type': '@type'
+        mefAttributes:
+          '@type': '@type'
       properties:
         id:
           description: Unique identifier of the product
@@ -1042,8 +1042,21 @@ components:
           items:
             $ref: '#/components/schemas/RelatedPlaceRefOrValue'
           type: array
+        mefAttributes:
+          $ref: '#/components/schemas/MEFProductPlaceholder'
         '@type':
           description: When sub-classing, this defines the sub-class entity name
+          type: string
+      type: object
+    MEFProductPlaceholder:
+      description: Here MEF Specification attributes should be injected
+      discriminator:
+        propertyName: '@type'
+      example:
+        '@type': '@type'
+      properties:
+        '@type':
+          description: To discriminate MEF Specification type
           type: string
       type: object
     ProductOfferingQualificationItem:
@@ -1078,6 +1091,8 @@ components:
           - role: role
             '@type': '@type'
           - role: role
+            '@type': '@type'
+          mefAttributes:
             '@type': '@type'
         productOffering:
           '@referredType': '@referredType'
@@ -1275,6 +1290,8 @@ components:
               '@type': '@type'
             - role: role
               '@type': '@type'
+            mefAttributes:
+              '@type': '@type'
           productOffering:
             '@referredType': '@referredType'
             id: id
@@ -1381,6 +1398,8 @@ components:
             - role: role
               '@type': '@type'
             - role: role
+              '@type': '@type'
+            mefAttributes:
               '@type': '@type'
           productOffering:
             '@referredType': '@referredType'
@@ -1948,74 +1967,8 @@ components:
       type: object
     Sonata-AEL-POQ:
       allOf:
-      - $ref: '#/components/schemas/Product'
+      - $ref: '#/components/schemas/MEFProductPlaceholder'
       - $ref: '#/components/schemas/MEF_LSO_Sonata_Schema_for_Access_E_Line__OVC____Function__POQ'
-    OVC:
-      description: OVC Service Attributes control the behavior observable at and between
-        External Interfaces to the Carrier Ethernet Network (CEN). The behaviors are
-        achieved by the Network Operator and the Operator's client (the Service Provider
-        in this case) agreeing on the value for each of the Service Attributes.
-      properties:
-        role:
-          description: Schema role - MEF 57.2 §9.12.1 (under devel)
-          enum:
-          - ovc
-          type: string
-        maximumFrameSize:
-          description: OVC Maximum Frame Size - MEF 26.2 §12.6
-          minimum: 1526
-          type: integer
-        ceVlanIdPreservation:
-          description: OVC CE-VLAN ID Preservation - MEF 26.2 §12.7
-          enum:
-          - PRESERVE
-          - STRIP
-          - RETAIN
-          type: string
-        cTagPcpPreservation:
-          description: OVC CE-VLAN PCP Preservation - MEF 26.2 §12.8
-          enum:
-          - ENABLED
-          - DISABLED
-          type: string
-        cTagDeiPreservation:
-          description: OVC CE-VLAN DEI Preservation - MEF 26.2 §12.9
-          enum:
-          - ENABLED
-          - DISABLED
-          type: string
-        listOfClassOfServiceNames:
-          description: OVC List of Class of Service Names - MEF 26.2 §12.12
-          items:
-            type: string
-          maxItems: 8
-          minItems: 1
-          type: array
-          uniqueItems: true
-        carrierEthernetSls:
-          description: OVC Service Level Specification - MEF 26.2 §12.13
-          type: string
-        availableMegLevel:
-          description: OVC Available MEG Level - MEF 26.2 §12.15
-          maximum: 6
-          minimum: 0
-          type: number
-        l2cpAddressSet:
-          description: OVC L2CP Address Set - MEF 45 §8.1 and MEF 26.2 §12.16
-          enum:
-          - CTA
-          - CTB
-          - CTB2
-          type: string
-        uniEP:
-          $ref: '#/components/schemas/objOvcEP'
-        enniEP:
-          $ref: '#/components/schemas/objOvcEP'
-      required:
-      - enniEP
-      - role
-      - uniEP
-      type: object
     objMEPspec:
       description: A 2-tuple for a MEP at an interface containing MEG level and direction
       properties: {}
@@ -2146,9 +2099,67 @@ components:
       - '@referredType'
       - id
     MEF_LSO_Sonata_Schema_for_Access_E_Line__OVC____Function__POQ:
-      description: 'MEF Forum [updated: 2020-Jun-3]'
+      description: OVC Service Attributes control the behavior observable at and between
+        External Interfaces to the Carrier Ethernet Network (CEN). The behaviors are
+        achieved by the Network Operator and the Operator's client (the Service Provider
+        in this case) agreeing on the value for each of the Service Attributes.
       properties:
-        mefAttributes:
-          $ref: '#/components/schemas/OVC'
+        role:
+          description: Schema role - MEF 57.2 §9.12.1 (under devel)
+          enum:
+          - ovc
+          type: object
+        maximumFrameSize:
+          description: OVC Maximum Frame Size - MEF 26.2 §12.6
+          minimum: 1526
+          type: integer
+        ceVlanIdPreservation:
+          description: OVC CE-VLAN ID Preservation - MEF 26.2 §12.7
+          enum:
+          - PRESERVE
+          - STRIP
+          - RETAIN
+          type: object
+        cTagPcpPreservation:
+          description: OVC CE-VLAN PCP Preservation - MEF 26.2 §12.8
+          enum:
+          - ENABLED
+          - DISABLED
+          type: object
+        cTagDeiPreservation:
+          description: OVC CE-VLAN DEI Preservation - MEF 26.2 §12.9
+          enum:
+          - ENABLED
+          - DISABLED
+          type: object
+        listOfClassOfServiceNames:
+          description: OVC List of Class of Service Names - MEF 26.2 §12.12
+          items:
+            type: string
+          maxItems: 8
+          minItems: 1
+          type: array
+          uniqueItems: true
+        carrierEthernetSls:
+          description: OVC Service Level Specification - MEF 26.2 §12.13
+          type: string
+        availableMegLevel:
+          description: OVC Available MEG Level - MEF 26.2 §12.15
+          maximum: 6
+          minimum: 0
+          type: number
+        l2cpAddressSet:
+          description: OVC L2CP Address Set - MEF 45 §8.1 and MEF 26.2 §12.16
+          enum:
+          - CTA
+          - CTB
+          - CTB2
+          type: object
+        uniEP:
+          $ref: '#/components/schemas/objOvcEP'
+        enniEP:
+          $ref: '#/components/schemas/objOvcEP'
       required:
-      - mefAttributes
+      - enniEP
+      - role
+      - uniEP

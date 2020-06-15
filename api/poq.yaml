@@ -761,10 +761,21 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/RelatedPlaceRefOrValue"
+      mefAttributes:
+        $ref: "#/definitions/MEFProductPlaceholder"
       "@type":
         description:
           "When\_sub-classing,\_this\_defines\_the\_sub-class\_entity\_\
           name"
+        type: "string"
+  MEFProductPlaceholder:
+    description: "Here MEF Specification attributes should be injected"
+    type: "object"
+    discriminator: "@type"
+    properties:
+      "@type":
+        description:
+          "To discriminate MEF Specification type"
         type: "string"
   ProductOfferingQualificationItem:
     description:
